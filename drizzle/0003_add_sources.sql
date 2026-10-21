@@ -1,0 +1,2 @@
+ALTER TABLE "applications" DROP CONSTRAINT "applications_source_check";--> statement-breakpoint
+ALTER TABLE "applications" ADD CONSTRAINT "applications_source_check" CHECK ("applications"."source" in ('linkedin', 'seek', 'trade_me', 'prosple', 'sjs', 'company_website', 'recruiter', 'referral', 'other'));

@@ -36,7 +36,6 @@ function toFormValues(app: Application | undefined): ApplicationFormValues {
       location: "",
       workMode: "not_specified",
       employmentType: "full_time",
-      jobUrl: "",
       jobDescription: "",
       applicationDate: todayDateOnly(),
       closingDate: "",
@@ -53,7 +52,6 @@ function toFormValues(app: Application | undefined): ApplicationFormValues {
     location: app.location,
     workMode: app.workMode,
     employmentType: app.employmentType,
-    jobUrl: app.jobUrl,
     jobDescription: app.jobDescription,
     applicationDate: app.applicationDate ?? "",
     closingDate: app.closingDate ?? "",
@@ -230,9 +228,6 @@ export function ApplicationForm({ application, categories }: { application?: App
             onChange={(v) => set("employmentType", v)}
             options={optionsFrom(EMPLOYMENT_TYPES, EMPLOYMENT_TYPE_LABELS)}
           />
-        </FormField>
-        <FormField id="field-jobUrl" label="Job advertisement URL" error={errors.jobUrl} className="sm:col-span-2">
-          <Input {...text("jobUrl")} type="url" inputMode="url" placeholder="https://" />
         </FormField>
       </Section>
 

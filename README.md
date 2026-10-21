@@ -88,7 +88,7 @@ Export writes one UTF-8 CSV per backup. It includes every field, with the status
 
 Import shows a preview before saving anything:
 
-- At least **Company Name** and **Job Title** columns are required. Common alternative headers (`Company`, `Title`, `Status`, `Date Applied`, `URL`, …) are recognised.
+- At least **Company Name** and **Job Title** columns are required. Common alternative headers (`Company`, `Title`, `Status`, `Date Applied`, …) are recognised.
 - Stages, sources, work modes and employment types match their labels case-insensitively. Unknown values fall back to a default and are flagged.
 - Dates may be `YYYY-MM-DD`, `DD/MM/YYYY`, or `5 Mar 2026`. Unrecognised dates are left empty and flagged.
 - **Duplicates** match an existing record by ID, or by company + job title + application date. You can skip them or replace the existing records. Rows that repeat within the file, or are missing required fields, are skipped.

@@ -29,7 +29,7 @@ const invalid = (error = "Invalid request."): ActionResult<never> => ({ ok: fals
 const str = (value: unknown, max: number) => (typeof value === "string" ? value.slice(0, max) : "");
 
 const FORM_KEYS = [
-  "companyName", "jobTitle", "categoryId", "location", "workMode", "employmentType", "jobUrl",
+  "companyName", "jobTitle", "categoryId", "location", "workMode", "employmentType",
   "jobDescription", "applicationDate", "closingDate", "source", "stage", "followUpDate", "notes",
 ] as const satisfies readonly (keyof ApplicationFormValues)[];
 

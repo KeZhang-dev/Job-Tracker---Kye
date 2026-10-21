@@ -12,7 +12,6 @@ export interface Application {
   location: string;
   workMode: WorkMode;
   employmentType: EmploymentType;
-  jobUrl: string;
   jobDescription: string;
   applicationDate: DateOnly | null;
   closingDate: DateOnly | null;

@@ -19,7 +19,6 @@ export interface ApplicationFormValues {
   location: string;
   workMode: WorkMode;
   employmentType: EmploymentType;
-  jobUrl: string;
   jobDescription: string;
   applicationDate: string;
   closingDate: string;
@@ -35,26 +34,9 @@ export const LIMITS = {
   companyName: 120,
   jobTitle: 200,
   location: 120,
-  jobUrl: 2048,
   jobDescription: 100_000,
   notes: 20_000,
 } as const;
-
-export function isValidHttpUrl(value: string): boolean {
-  try {
-    const url = new URL(value);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
-/** Adds https:// when the user pastes a bare domain such as "seek.co.nz/job/123". */
-export function normalizeUrl(value: string): string {
-  const trimmed = value.trim();
-  if (!trimmed || /^[a-z][a-z\d+.-]*:/i.test(trimmed)) return trimmed;
-  return `https://${trimmed}`;
-}
 
 export function validateApplication(
   values: ApplicationFormValues,
@@ -63,7 +45,6 @@ export function validateApplication(
   const errors: FormErrors = {};
   const companyName = values.companyName.trim();
   const jobTitle = values.jobTitle.trim();
-  const jobUrl = normalizeUrl(values.jobUrl);
 
   if (!companyName) errors.companyName = "Company name is required.";
   else if (companyName.length > LIMITS.companyName) errors.companyName = `Keep it under ${LIMITS.companyName} characters.`;
@@ -77,9 +58,6 @@ export function validateApplication(
   if (!EMPLOYMENT_TYPES.includes(values.employmentType)) errors.employmentType = "Choose an employment type.";
   if (!SOURCES.includes(values.source)) errors.source = "Choose an application source.";
   if (!STAGES.includes(values.stage)) errors.stage = "Choose a recruitment stage.";
-
-  if (jobUrl && !isValidHttpUrl(jobUrl)) errors.jobUrl = "Enter a valid web address (http or https).";
-  else if (jobUrl.length > LIMITS.jobUrl) errors.jobUrl = "This URL is too long.";
 
   if (!values.applicationDate) errors.applicationDate = "Application date is required.";
   for (const field of ["applicationDate", "closingDate", "followUpDate"] as const) {
@@ -104,7 +82,6 @@ export function validateApplication(
       location: values.location.trim(),
       workMode: values.workMode,
       employmentType: values.employmentType,
-      jobUrl,
       jobDescription: values.jobDescription.trim(),
       applicationDate: values.applicationDate || null,
       closingDate: values.closingDate || null,

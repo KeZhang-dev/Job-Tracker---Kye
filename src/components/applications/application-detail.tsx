@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeftIcon, ArrowRightIcon, ExternalLinkIcon, PencilIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon, PencilIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { EMPLOYMENT_TYPE_LABELS, EVENT_TYPE_LABELS, SOURCE_LABELS, WORK_MODE_LABELS } from "@/lib/constants";
 import { formatDate, formatTimestamp } from "@/lib/dates";
 import { unwrap } from "@/lib/action-result";
@@ -179,14 +179,6 @@ export function ApplicationDetail({
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {app.jobUrl && (
-            <Button asChild variant="outline">
-              <a href={app.jobUrl} target="_blank" rel="noopener noreferrer">
-                <ExternalLinkIcon aria-hidden />
-                Job ad
-              </a>
-            </Button>
-          )}
           <StageChangeDialog application={app} />
           <Button asChild variant="outline">
             <Link href={`/applications/${app.id}/edit`}>

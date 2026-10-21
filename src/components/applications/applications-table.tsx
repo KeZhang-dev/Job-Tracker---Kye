@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowDownIcon, ArrowUpDownIcon, ArrowUpIcon, ExternalLinkIcon, PencilIcon } from "lucide-react";
+import { ArrowDownIcon, ArrowUpDownIcon, ArrowUpIcon, PencilIcon } from "lucide-react";
 import { SOURCE_LABELS, WORK_MODE_LABELS, isTerminalStage } from "@/lib/constants";
 import { formatDate, formatTimestamp, formatTimestampDate, parseDateOnly } from "@/lib/dates";
 import type { ApplicationQuery, SortField } from "@/lib/application-query";
@@ -135,13 +135,6 @@ export function ApplicationsTable({
                 </TableCell>
                 <TableCell className="pr-4" onClick={(e) => e.stopPropagation()}>
                   <div className="flex justify-end gap-0.5">
-                    {app.jobUrl && (
-                      <Button asChild variant="ghost" size="icon-sm">
-                        <a href={app.jobUrl} target="_blank" rel="noopener noreferrer" aria-label={`Open job ad for ${app.jobTitle} (new tab)`}>
-                          <ExternalLinkIcon />
-                        </a>
-                      </Button>
-                    )}
                     <Button asChild variant="ghost" size="icon-sm">
                       <Link href={`${href}/edit`} aria-label={`Edit ${app.jobTitle} at ${app.companyName}`}>
                         <PencilIcon />

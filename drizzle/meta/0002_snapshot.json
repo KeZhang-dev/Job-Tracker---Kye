@@ -1,0 +1,448 @@
+{
+  "id": "00452881-3518-4bfa-8f4a-eb056f69207a",
+  "prevId": "9cbe489f-4216-40cb-82a8-9064ba7bb719",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.applications": {
+      "name": "applications",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "company_name": {
+          "name": "company_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "job_title": {
+          "name": "job_title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category_id": {
+          "name": "category_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location": {
+          "name": "location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "work_mode": {
+          "name": "work_mode",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'not_specified'"
+        },
+        "employment_type": {
+          "name": "employment_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'full_time'"
+        },
+        "job_description": {
+          "name": "job_description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "application_date": {
+          "name": "application_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "closing_date": {
+          "name": "closing_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'other'"
+        },
+        "stage": {
+          "name": "stage",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'applied'"
+        },
+        "follow_up_date": {
+          "name": "follow_up_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "is_sample": {
+          "name": "is_sample",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "applications_category_idx": {
+          "name": "applications_category_idx",
+          "columns": [
+            {
+              "expression": "category_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "applications_stage_idx": {
+          "name": "applications_stage_idx",
+          "columns": [
+            {
+              "expression": "stage",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "applications_application_date_idx": {
+          "name": "applications_application_date_idx",
+          "columns": [
+            {
+              "expression": "application_date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "applications_category_id_categories_id_fk": {
+          "name": "applications_category_id_categories_id_fk",
+          "tableFrom": "applications",
+          "tableTo": "categories",
+          "columnsFrom": [
+            "category_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "applications_work_mode_check": {
+          "name": "applications_work_mode_check",
+          "value": "\"applications\".\"work_mode\" in ('on_site', 'hybrid', 'remote', 'not_specified')"
+        },
+        "applications_employment_type_check": {
+          "name": "applications_employment_type_check",
+          "value": "\"applications\".\"employment_type\" in ('full_time', 'part_time', 'contract', 'casual', 'internship', 'other')"
+        },
+        "applications_source_check": {
+          "name": "applications_source_check",
+          "value": "\"applications\".\"source\" in ('linkedin', 'seek', 'trade_me', 'company_website', 'recruiter', 'referral', 'other')"
+        },
+        "applications_stage_check": {
+          "name": "applications_stage_check",
+          "value": "\"applications\".\"stage\" in ('applied', 'phone_screen', 'online_assessment', 'first_interview', 'second_interview', 'technical_interview', 'reference_check', 'offer', 'rejected', 'withdrawn', 'no_response', 'position_closed')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.categories": {
+      "name": "categories",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sort_order": {
+          "name": "sort_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        }
+      },
+      "indexes": {
+        "categories_name_lower_idx": {
+          "name": "categories_name_lower_idx",
+          "columns": [
+            {
+              "expression": "lower(\"name\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.events": {
+      "name": "events",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "application_id": {
+          "name": "application_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        }
+      },
+      "indexes": {
+        "events_application_idx": {
+          "name": "events_application_idx",
+          "columns": [
+            {
+              "expression": "application_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "events_application_id_applications_id_fk": {
+          "name": "events_application_id_applications_id_fk",
+          "tableFrom": "events",
+          "tableTo": "applications",
+          "columnsFrom": [
+            "application_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "events_type_check": {
+          "name": "events_type_check",
+          "value": "\"events\".\"type\" in ('phone_screen', 'online_assessment', 'interview', 'technical_interview', 'other')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.stage_history": {
+      "name": "stage_history",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "application_id": {
+          "name": "application_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "from_stage": {
+          "name": "from_stage",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "to_stage": {
+          "name": "to_stage",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "changed_at": {
+          "name": "changed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        }
+      },
+      "indexes": {
+        "stage_history_application_idx": {
+          "name": "stage_history_application_idx",
+          "columns": [
+            {
+              "expression": "application_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "stage_history_application_id_applications_id_fk": {
+          "name": "stage_history_application_id_applications_id_fk",
+          "tableFrom": "stage_history",
+          "tableTo": "applications",
+          "columnsFrom": [
+            "application_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "stage_history_from_stage_check": {
+          "name": "stage_history_from_stage_check",
+          "value": "\"stage_history\".\"from_stage\" is null or \"stage_history\".\"from_stage\" in ('applied', 'phone_screen', 'online_assessment', 'first_interview', 'second_interview', 'technical_interview', 'reference_check', 'offer', 'rejected', 'withdrawn', 'no_response', 'position_closed')"
+        },
+        "stage_history_to_stage_check": {
+          "name": "stage_history_to_stage_check",
+          "value": "\"stage_history\".\"to_stage\" in ('applied', 'phone_screen', 'online_assessment', 'first_interview', 'second_interview', 'technical_interview', 'reference_check', 'offer', 'rejected', 'withdrawn', 'no_response', 'position_closed')"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

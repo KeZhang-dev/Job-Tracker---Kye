@@ -32,7 +32,6 @@ export const applications = pgTable(
     location: text("location").notNull().default(""),
     workMode: text("work_mode").notNull().default("not_specified"),
     employmentType: text("employment_type").notNull().default("full_time"),
-    jobUrl: text("job_url").notNull().default(""),
     jobDescription: text("job_description").notNull().default(""),
     applicationDate: date("application_date", { mode: "string" }),
     closingDate: date("closing_date", { mode: "string" }),

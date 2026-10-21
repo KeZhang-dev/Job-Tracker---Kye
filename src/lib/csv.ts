@@ -21,7 +21,7 @@ import {
 import { isValidDateOnly, normalizeDateInput, todayDateOnly } from "./dates";
 import { isUuid, newId } from "./ids";
 import type { Application, ApplicationEvent, Category, StageChange } from "./types";
-import { LIMITS, isValidHttpUrl, normalizeUrl } from "./validation";
+import { LIMITS } from "./validation";
 
 const COLUMNS = [
   ["id", "ID"],
@@ -31,7 +31,6 @@ const COLUMNS = [
   ["location", "Location"],
   ["workMode", "Work Mode"],
   ["employmentType", "Employment Type"],
-  ["jobUrl", "Job URL"],
   ["source", "Application Source"],
   ["stage", "Current Stage"],
   ["applicationDate", "Application Date"],
@@ -55,8 +54,6 @@ const HEADER_ALIASES: Record<string, ColumnKey> = {
   role: "jobTitle",
   category: "category",
   rolecategory: "category",
-  url: "jobUrl",
-  link: "jobUrl",
   source: "source",
   stage: "stage",
   status: "stage",
@@ -110,7 +107,6 @@ export function buildExportCsv(
       location: app.location,
       workMode: WORK_MODE_LABELS[app.workMode],
       employmentType: EMPLOYMENT_TYPE_LABELS[app.employmentType],
-      jobUrl: app.jobUrl,
       source: SOURCE_LABELS[app.source],
       stage: STAGE_LABELS[app.stage],
       applicationDate: app.applicationDate ?? "",
@@ -292,12 +288,6 @@ export function previewImport(text: string, existing: Application[]): ImportPrev
     const followUpDate = dateField("followUpDate", "Follow-up date");
     if (!applicationDate) warnings.push("No application date — this record only appears under All Time.");
 
-    let jobUrl = normalizeUrl(get("jobUrl"));
-    if (jobUrl && !isValidHttpUrl(jobUrl)) {
-      warnings.push("Job URL is not a valid web address and was dropped.");
-      jobUrl = "";
-    }
-
     // Duplicate detection: same ID, or same company + title + application date.
     const rawId = get("id");
     const key = duplicateKey(companyName, jobTitle, applicationDate);
@@ -344,7 +334,6 @@ export function previewImport(text: string, existing: Application[]): ImportPrev
           location: get("location").slice(0, LIMITS.location),
           workMode,
           employmentType,
-          jobUrl,
           jobDescription: get("jobDescription"),
           applicationDate,
           closingDate,

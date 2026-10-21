@@ -72,7 +72,6 @@ export async function loadSampleData(): Promise<number> {
         location: spec.location,
         workMode: spec.workMode,
         employmentType: spec.employmentType,
-        jobUrl: "",
         jobDescription: "This is sample data created for demonstration purposes. Remove it from Settings → Sample data.",
         applicationDate: toDateOnly(applied),
         closingDate: toDateOnly(addDays(applied, 14)),

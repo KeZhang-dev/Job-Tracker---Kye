@@ -82,17 +82,19 @@ export function BarListChart({
         </Bar>
       </BarChart>
       {/* Text alternative for screen readers. */}
-      <table className="sr-only">
-        <caption>{caption}</caption>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.key}>
-              <th scope="row">{r.label}</th>
-              <td>{label(r)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="sr-only">
+        <table>
+          <caption>{caption}</caption>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.key}>
+                <th scope="row">{r.label}</th>
+                <td>{label(r)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </figure>
   );
 }

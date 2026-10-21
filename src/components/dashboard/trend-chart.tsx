@@ -87,17 +87,19 @@ export function TrendChart({
               isAnimationActive={false}
             />
           </LineChart>
-          <table className="sr-only">
-            <caption>Applications per {granularity}</caption>
-            <tbody>
-              {points.map((p) => (
-                <tr key={p.key}>
-                  <th scope="row">{p.fullLabel}</th>
-                  <td>{p.count}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="sr-only">
+            <table>
+              <caption>Applications per {granularity}</caption>
+              <tbody>
+                {points.map((p) => (
+                  <tr key={p.key}>
+                    <th scope="row">{p.fullLabel}</th>
+                    <td>{p.count}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </figure>
       )}
     </ChartCard>

@@ -16,7 +16,8 @@ import {
   WORK_MODE_LABELS,
 } from "@/lib/constants";
 import { todayDateOnly } from "@/lib/dates";
-import { addCategory, createApplication, updateApplication } from "@/lib/repository";
+import { unwrap } from "@/lib/action-result";
+import { addCategoryAction, createApplicationAction, updateApplicationAction } from "@/lib/actions";
 import type { Application, Category } from "@/lib/types";
 import { LIMITS, validateApplication, type ApplicationFormValues, type FormErrors } from "@/lib/validation";
 import { Button } from "@/components/ui/button";
@@ -82,7 +83,7 @@ function NewCategoryInline({ onCreated }: { onCreated: (category: Category) => v
 
   async function submit() {
     try {
-      const category = await addCategory(name);
+      const category = await unwrap(addCategoryAction(name));
       onCreated(category);
       setName("");
       setError(undefined);
@@ -138,7 +139,7 @@ export function ApplicationForm({ application, categories }: { application?: App
   const [errors, setErrors] = useState<FormErrors>({});
   const [stageNote, setStageNote] = useState("");
   const [saving, setSaving] = useState(false);
-  // Categories created inline are added here until the live query catches up.
+  // Categories created inline are shown immediately, before the page data refreshes.
   const [extraCategories, setExtraCategories] = useState<Category[]>([]);
 
   const allCategories = [...categories, ...extraCategories.filter((e) => !categories.some((c) => c.id === e.id))];
@@ -161,17 +162,20 @@ export function ApplicationForm({ application, categories }: { application?: App
     }
     setSaving(true);
     try {
-      if (isEdit) {
-        await updateApplication(application!.id, input, stageNote.trim());
-        toast.success("Application updated");
-        router.push(`/applications/${application!.id}`);
-      } else {
-        const id = await createApplication(input);
-        toast.success("Application added");
-        router.push(`/applications/${id}`);
+      // The server validates again; its field errors are shown the same way.
+      const result = isEdit
+        ? await updateApplicationAction(application!.id, values, stageNote)
+        : await createApplicationAction(values);
+      if (!result.ok) {
+        if (result.fieldErrors) setErrors(result.fieldErrors);
+        toast.error(result.error);
+        setSaving(false);
+        return;
       }
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not save the application.");
+      toast.success(isEdit ? "Application updated" : "Application added");
+      router.push(`/applications/${isEdit ? application!.id : result.data}`);
+    } catch {
+      toast.error("Could not reach the server. Is the app still running?");
       setSaving(false);
     }
   }

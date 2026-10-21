@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Trash2Icon } from "lucide-react";
-import { deleteApplication } from "@/lib/repository";
+import { unwrap } from "@/lib/action-result";
+import { deleteApplicationAction } from "@/lib/actions";
 import type { Application } from "@/lib/types";
 import {
   AlertDialog,
@@ -20,23 +22,25 @@ import { Button } from "@/components/ui/button";
 
 export function DeleteApplicationButton({
   application,
-  onDeleted,
+  redirectToList = false,
   iconOnly = false,
 }: {
   application: Pick<Application, "id" | "companyName" | "jobTitle">;
-  onDeleted?: () => void;
+  /** Navigate to the list afterwards (used on the detail page, which no longer exists after deleting). */
+  redirectToList?: boolean;
   iconOnly?: boolean;
 }) {
+  const router = useRouter();
   const [busy, setBusy] = useState(false);
 
   async function confirm() {
     setBusy(true);
     try {
-      await deleteApplication(application.id);
+      await unwrap(deleteApplicationAction(application.id, redirectToList));
       toast.success(`Deleted ${application.jobTitle} at ${application.companyName}`);
-      onDeleted?.();
-    } catch {
-      toast.error("Could not delete the application.");
+      if (redirectToList) router.push("/applications");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not delete the application.");
     } finally {
       setBusy(false);
     }

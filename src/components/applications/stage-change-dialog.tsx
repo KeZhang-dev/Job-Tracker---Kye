@@ -5,7 +5,8 @@ import { toast } from "sonner";
 import { ArrowRightLeftIcon } from "lucide-react";
 import { ACTIVE_STAGES, STAGE_LABELS, TERMINAL_STAGES, type Stage } from "@/lib/constants";
 import { toDateTimeLocal } from "@/lib/dates";
-import { changeStage } from "@/lib/repository";
+import { unwrap } from "@/lib/action-result";
+import { changeStageAction } from "@/lib/actions";
 import type { Application } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,8 +41,9 @@ function StageChangeForm({ application, onDone }: { application: Application; on
     if (date.getTime() > Date.now() + 60_000) return setError("The change can't be in the future.");
     setSaving(true);
     try {
-      const at = changedAt === defaultChangedAt ? new Date().toISOString() : date.toISOString();
-      await changeStage(application.id, stage, { changedAt: at, note });
+      // null = "now" on the server (exact time, not the picker's whole minute).
+      const at = changedAt === defaultChangedAt ? null : date.toISOString();
+      await unwrap(changeStageAction(application.id, stage, at, note));
       toast.success(`Moved to ${STAGE_LABELS[stage]}`);
       onDone();
     } catch (err) {

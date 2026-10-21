@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ArrowLeftIcon, ArrowRightIcon, ExternalLinkIcon, PencilIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { EMPLOYMENT_TYPE_LABELS, EVENT_TYPE_LABELS, SOURCE_LABELS, WORK_MODE_LABELS } from "@/lib/constants";
 import { formatDate, formatTimestamp } from "@/lib/dates";
-import { deleteEvent, deleteStageChange } from "@/lib/repository";
+import { unwrap } from "@/lib/action-result";
+import { deleteEventAction, deleteStageChangeAction } from "@/lib/actions";
 import type { Application, ApplicationEvent, Category, StageChange } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -58,8 +58,12 @@ function StatusHistory({ history }: { history: StageChange[] }) {
                     aria-label="Remove this history entry"
                     title="Remove this history entry (does not change the current stage)"
                     onClick={async () => {
-                      await deleteStageChange(change.id);
-                      toast.success("History entry removed");
+                      try {
+                        await unwrap(deleteStageChangeAction(change.id));
+                        toast.success("History entry removed");
+                      } catch (err) {
+                        toast.error(err instanceof Error ? err.message : "Could not remove the entry.");
+                      }
                     }}
                   >
                     <Trash2Icon />
@@ -116,8 +120,12 @@ function EventsCard({ applicationId, events }: { applicationId: string; events: 
                     size="icon-sm"
                     aria-label="Delete event"
                     onClick={async () => {
-                      await deleteEvent(event.id);
-                      toast.success("Event deleted");
+                      try {
+                        await unwrap(deleteEventAction(event.id));
+                        toast.success("Event deleted");
+                      } catch (err) {
+                        toast.error(err instanceof Error ? err.message : "Could not delete the event.");
+                      }
                     }}
                   >
                     <Trash2Icon />
@@ -149,8 +157,6 @@ export function ApplicationDetail({
   history: StageChange[];
   events: ApplicationEvent[];
 }) {
-  const router = useRouter();
-
   return (
     <div className="space-y-6">
       <Button asChild variant="ghost" size="sm" className="-ml-2">
@@ -188,7 +194,7 @@ export function ApplicationDetail({
               Edit
             </Link>
           </Button>
-          <DeleteApplicationButton application={app} onDeleted={() => router.push("/applications")} />
+          <DeleteApplicationButton application={app} redirectToList />
         </div>
       </div>
 

@@ -1,30 +1,38 @@
-"use client";
-
-import { useApplications, useCategories } from "@/hooks/use-data";
+import { loadPageData } from "@/db/errors";
+import { listApplications, listCategories } from "@/lib/repository";
 import { PageHeader } from "@/components/layout/page-header";
-import { PageLoading } from "@/components/shared/loading";
+import { DatabaseError } from "@/components/shared/database-error";
 import { BackupCard } from "@/components/settings/backup-card";
 import { CategoryManager } from "@/components/settings/category-manager";
+import { DatabaseCard } from "@/components/settings/database-card";
+import { LegacyImportCard } from "@/components/settings/legacy-import-card";
 import { SampleDataCard } from "@/components/settings/sample-data-card";
-import { StorageCard } from "@/components/settings/storage-card";
 
-export default function SettingsPage() {
-  const applications = useApplications();
-  const categories = useCategories();
-
-  if (!applications || !categories) return <PageLoading label="Loading settings…" />;
+export default async function SettingsPage() {
+  const { data, error } = await loadPageData(async () => {
+    const [applications, categories] = await Promise.all([listApplications(), listCategories()]);
+    return { applications, categories };
+  });
 
   return (
     <>
       <PageHeader title="Data & Settings" description="Back up your data, manage categories and sample records." />
-      <div className="grid gap-6 lg:grid-cols-2">
+      {error !== undefined ? (
         <div className="space-y-6">
-          <StorageCard />
-          <BackupCard applicationCount={applications.length} />
-          <SampleDataCard sampleCount={applications.filter((a) => a.isSample).length} />
+          <DatabaseError message={error} />
+          <DatabaseCard />
         </div>
-        <CategoryManager categories={categories} applications={applications} />
-      </div>
+      ) : (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="space-y-6">
+            <LegacyImportCard applications={data.applications} />
+            <DatabaseCard />
+            <BackupCard applications={data.applications} />
+            <SampleDataCard sampleCount={data.applications.filter((a) => a.isSample).length} />
+          </div>
+          <CategoryManager categories={data.categories} applications={data.applications} />
+        </div>
+      )}
     </>
   );
 }

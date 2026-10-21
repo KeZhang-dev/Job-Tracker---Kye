@@ -4,7 +4,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { CheckIcon, PencilIcon, PlusIcon, Trash2Icon, XIcon } from "lucide-react";
 import { FALLBACK_CATEGORY } from "@/lib/constants";
-import { addCategory, deleteCategory, renameCategory } from "@/lib/repository";
+import { unwrap } from "@/lib/action-result";
+import { addCategoryAction, deleteCategoryAction, renameCategoryAction } from "@/lib/actions";
 import type { Application, Category } from "@/lib/types";
 import {
   AlertDialog,
@@ -30,7 +31,7 @@ function CategoryRow({ category, usage }: { category: Category; usage: number })
 
   async function save() {
     try {
-      await renameCategory(category.id, name);
+      await unwrap(renameCategoryAction(category.id, name));
       setEditing(false);
       toast.success("Category renamed");
     } catch (e) {
@@ -40,7 +41,7 @@ function CategoryRow({ category, usage }: { category: Category; usage: number })
 
   async function remove() {
     try {
-      const moved = await deleteCategory(category.id);
+      const moved = await unwrap(deleteCategoryAction(category.id));
       toast.success(moved ? `Deleted. ${moved} application${moved === 1 ? "" : "s"} moved to "${FALLBACK_CATEGORY}".` : "Category deleted");
     } catch (e) {
       toast.error(errorMessage(e));
@@ -133,7 +134,7 @@ export function CategoryManager({ categories, applications }: { categories: Cate
   async function add(e: React.FormEvent) {
     e.preventDefault();
     try {
-      const c = await addCategory(newName);
+      const c = await unwrap(addCategoryAction(newName));
       setNewName("");
       toast.success(`Added "${c.name}"`);
     } catch (err) {

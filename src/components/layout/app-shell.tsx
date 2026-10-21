@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { BriefcaseIcon, LayoutDashboardIcon, ListIcon, MenuIcon, PlusIcon, SettingsIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -59,7 +59,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
       </nav>
 
       <p className="mt-auto px-2 text-xs leading-relaxed text-muted-foreground">
-        Data is stored only in this browser. Export a CSV backup regularly from Data &amp; Settings.
+        Data is stored in your local PostgreSQL database. Export a CSV backup regularly from Data &amp; Settings.
       </p>
     </div>
   );
@@ -67,11 +67,6 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
-
-  // Ask the browser not to evict our IndexedDB data under storage pressure.
-  useEffect(() => {
-    navigator.storage?.persist?.().catch(() => {});
-  }, []);
 
   return (
     <div className="flex min-h-screen">

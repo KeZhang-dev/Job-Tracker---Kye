@@ -4,7 +4,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { EVENT_TYPES, EVENT_TYPE_LABELS, type EventType } from "@/lib/constants";
 import { isValidDateOnly, todayDateOnly } from "@/lib/dates";
-import { saveEvent } from "@/lib/repository";
+import { unwrap } from "@/lib/action-result";
+import { saveEventAction } from "@/lib/actions";
 import type { ApplicationEvent } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -33,7 +34,7 @@ function EventForm({
     if (!isValidDateOnly(date)) return setError("Enter a valid date.");
     setSaving(true);
     try {
-      await saveEvent({ id: event?.id, applicationId, type, date, title: title.trim(), notes: notes.trim() });
+      await unwrap(saveEventAction({ id: event?.id, applicationId, type, date, title: title.trim(), notes: notes.trim() }));
       toast.success(event ? "Event updated" : "Event added");
       onDone();
     } catch (err) {

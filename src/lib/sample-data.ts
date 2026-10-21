@@ -1,10 +1,14 @@
 // Clearly labelled sample records for trying the app out. They are flagged with
 // `isSample: true` and can be removed from Settings in one click.
 
+import "server-only";
+
 import { addDays, subDays } from "date-fns";
+import { getDb } from "@/db";
 import type { EmploymentType, EventType, Source, Stage, WorkMode } from "./constants";
 import { toDateOnly } from "./dates";
-import { getOrCreateCategory, newId, putApplicationsWithHistory } from "./repository";
+import { newId } from "./ids";
+import { getOrCreateCategory, putApplicationsWithHistory, type FullRecord } from "./repository";
 import type { Application, ApplicationEvent, StageChange } from "./types";
 
 interface SampleSpec {
@@ -35,52 +39,54 @@ const SPECS: SampleSpec[] = [
 ];
 
 export async function loadSampleData(): Promise<number> {
-  const today = new Date();
-  const records = [];
-  for (const spec of SPECS) {
-    const id = newId();
-    const applied = subDays(today, spec.daysAgo);
-    const category = await getOrCreateCategory(spec.category);
-    // Space stage changes out without letting any land in the future.
-    const step = Math.min(7, Math.floor(spec.daysAgo / spec.path.length));
-    const history: StageChange[] = spec.path.map((stage, i) => ({
-      id: newId(),
-      applicationId: id,
-      fromStage: i === 0 ? null : spec.path[i - 1],
-      toStage: stage,
-      changedAt: addDays(applied, i * step).toISOString(),
-      note: i === 0 ? "Sample data" : "",
-    }));
-    const events: ApplicationEvent[] = (spec.events ?? []).map((e) => ({
-      id: newId(),
-      applicationId: id,
-      type: e.type,
-      date: toDateOnly(addDays(applied, e.afterDays)),
-      title: e.title,
-      notes: "",
-    }));
-    const application: Application = {
-      id,
-      companyName: spec.company,
-      jobTitle: spec.title,
-      categoryId: category.id,
-      location: spec.location,
-      workMode: spec.workMode,
-      employmentType: spec.employmentType,
-      jobUrl: "",
-      jobDescription: "This is sample data created for demonstration purposes. Remove it from Settings → Sample data.",
-      applicationDate: toDateOnly(applied),
-      closingDate: toDateOnly(addDays(applied, 14)),
-      source: spec.source,
-      stage: spec.path[spec.path.length - 1],
-      followUpDate: null,
-      notes: "Sample record — not a real application.",
-      isSample: true,
-      createdAt: applied.toISOString(),
-      updatedAt: history[history.length - 1].changedAt,
-    };
-    records.push({ application, history, events });
-  }
-  await putApplicationsWithHistory(records);
-  return records.length;
+  return getDb().transaction(async (tx) => {
+    const today = new Date();
+    const records: FullRecord[] = [];
+    for (const spec of SPECS) {
+      const id = newId();
+      const applied = subDays(today, spec.daysAgo);
+      const category = await getOrCreateCategory(spec.category, tx);
+      // Space stage changes out without letting any land in the future.
+      const step = Math.min(7, Math.floor(spec.daysAgo / spec.path.length));
+      const history: StageChange[] = spec.path.map((stage, i) => ({
+        id: newId(),
+        applicationId: id,
+        fromStage: i === 0 ? null : spec.path[i - 1],
+        toStage: stage,
+        changedAt: addDays(applied, i * step).toISOString(),
+        note: i === 0 ? "Sample data" : "",
+      }));
+      const events: ApplicationEvent[] = (spec.events ?? []).map((e) => ({
+        id: newId(),
+        applicationId: id,
+        type: e.type,
+        date: toDateOnly(addDays(applied, e.afterDays)),
+        title: e.title,
+        notes: "",
+      }));
+      const application: Application = {
+        id,
+        companyName: spec.company,
+        jobTitle: spec.title,
+        categoryId: category.id,
+        location: spec.location,
+        workMode: spec.workMode,
+        employmentType: spec.employmentType,
+        jobUrl: "",
+        jobDescription: "This is sample data created for demonstration purposes. Remove it from Settings → Sample data.",
+        applicationDate: toDateOnly(applied),
+        closingDate: toDateOnly(addDays(applied, 14)),
+        source: spec.source,
+        stage: spec.path[spec.path.length - 1],
+        followUpDate: null,
+        notes: "Sample record — not a real application.",
+        isSample: true,
+        createdAt: applied.toISOString(),
+        updatedAt: history[history.length - 1].changedAt,
+      };
+      records.push({ application, history, events });
+    }
+    await putApplicationsWithHistory(records, tx);
+    return records.length;
+  });
 }

@@ -3,9 +3,10 @@
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { AlertTriangleIcon, DownloadIcon, Loader2Icon, UploadIcon } from "lucide-react";
-import { db } from "@/lib/db";
-import { buildExportCsv, commitImport, downloadCsv, readImportFile, type DuplicateMode, type ImportPreview } from "@/lib/csv";
+import { importCsvAction } from "@/lib/actions";
+import { downloadBlob, readImportFile, type DuplicateMode, type ImportPreview } from "@/lib/csv";
 import { todayDateOnly } from "@/lib/dates";
+import type { Application } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -21,10 +22,16 @@ function Stat({ label, value, tone }: { label: string; value: number; tone?: "wa
   );
 }
 
-function ImportDialog({ preview, onClose }: { preview: ImportPreview | null; onClose: () => void }) {
+export interface PendingImport {
+  text: string;
+  preview: ImportPreview;
+}
+
+export function ImportDialog({ pending, onClose }: { pending: PendingImport | null; onClose: () => void }) {
   const [mode, setMode] = useState<DuplicateMode>("skip");
   const [importing, setImporting] = useState(false);
-  if (!preview) return null;
+  if (!pending) return null;
+  const { preview } = pending;
 
   const count = (s: string) => preview.rows.filter((r) => r.status === s).length;
   const fresh = count("new");
@@ -36,12 +43,18 @@ function ImportDialog({ preview, onClose }: { preview: ImportPreview | null; onC
   async function confirm() {
     setImporting(true);
     try {
-      const { added, updated } = await commitImport(preview!, mode);
+      // The server re-checks the file against the current database before writing.
+      const result = await importCsvAction(pending!.text, mode);
+      if (!result.ok) {
+        toast.error(`Import failed. No changes were saved. ${result.error}`);
+        setImporting(false);
+        return;
+      }
+      const { added, updated } = result.data;
       toast.success(`Import complete: ${added} added${updated ? `, ${updated} updated` : ""}.`);
       onClose();
-    } catch (err) {
-      console.error(err);
-      toast.error("Import failed. No changes were saved.");
+    } catch {
+      toast.error("Import failed: could not reach the server. No changes were saved.");
       setImporting(false);
     }
   }
@@ -131,25 +144,21 @@ function ImportDialog({ preview, onClose }: { preview: ImportPreview | null; onC
   );
 }
 
-export function BackupCard({ applicationCount }: { applicationCount: number }) {
+export function BackupCard({ applications }: { applications: Application[] }) {
   const fileInput = useRef<HTMLInputElement>(null);
-  const [preview, setPreview] = useState<ImportPreview | null>(null);
+  const [pending, setPending] = useState<PendingImport | null>(null);
   const [busy, setBusy] = useState<"export" | "read" | null>(null);
 
   async function exportCsv() {
     setBusy("export");
     try {
-      const [apps, categories, history, events] = await Promise.all([
-        db.applications.toArray(),
-        db.categories.toArray(),
-        db.stageHistory.toArray(),
-        db.events.toArray(),
-      ]);
-      apps.sort((a, b) => (b.applicationDate ?? "").localeCompare(a.applicationDate ?? ""));
-      downloadCsv(buildExportCsv(apps, categories, history, events), `job-applications-${todayDateOnly()}.csv`);
-      toast.success(`Exported ${apps.length} application${apps.length === 1 ? "" : "s"}`);
-    } catch {
-      toast.error("Export failed.");
+      const response = await fetch("/api/export", { cache: "no-store" });
+      if (!response.ok) throw new Error(await response.text());
+      const count = Number(response.headers.get("X-Record-Count") ?? 0);
+      downloadBlob(await response.blob(), `job-applications-${todayDateOnly()}.csv`);
+      toast.success(`Exported ${count} application${count === 1 ? "" : "s"}`);
+    } catch (err) {
+      toast.error(err instanceof Error && err.message ? `Export failed: ${err.message}` : "Export failed.");
     } finally {
       setBusy(null);
     }
@@ -165,7 +174,7 @@ export function BackupCard({ applicationCount }: { applicationCount: number }) {
     }
     setBusy("read");
     try {
-      setPreview(await readImportFile(file, await db.applications.toArray()));
+      setPending(await readImportFile(file, applications));
     } catch {
       toast.error("The file could not be read as CSV.");
     } finally {
@@ -184,7 +193,7 @@ export function BackupCard({ applicationCount }: { applicationCount: number }) {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-wrap gap-2">
-          <Button onClick={() => void exportCsv()} disabled={busy !== null || applicationCount === 0}>
+          <Button onClick={() => void exportCsv()} disabled={busy !== null || applications.length === 0}>
             {busy === "export" ? <Loader2Icon className="animate-spin" aria-hidden /> : <DownloadIcon aria-hidden />}
             Export CSV
           </Button>
@@ -199,7 +208,7 @@ export function BackupCard({ applicationCount }: { applicationCount: number }) {
           Imports need at least “Company Name” and “Job Title” columns. Unknown stages, sources or dates are flagged before anything is saved.
         </p>
       </CardContent>
-      <ImportDialog key={preview ? "open" : "closed"} preview={preview} onClose={() => setPreview(null)} />
+      <ImportDialog key={pending ? "open" : "closed"} pending={pending} onClose={() => setPending(null)} />
     </Card>
   );
 }

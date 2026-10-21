@@ -19,8 +19,7 @@ import {
   type WorkMode,
 } from "./constants";
 import { isValidDateOnly, normalizeDateInput, todayDateOnly } from "./dates";
-import { db } from "./db";
-import { getOrCreateCategory, newId, putApplicationsWithHistory } from "./repository";
+import { isUuid, newId } from "./ids";
 import type { Application, ApplicationEvent, Category, StageChange } from "./types";
 import { LIMITS, isValidHttpUrl, normalizeUrl } from "./validation";
 
@@ -129,9 +128,7 @@ export function buildExportCsv(
   return Papa.unparse({ fields: COLUMNS.map(([, label]) => label), data: rows }, { quotes: true });
 }
 
-export function downloadCsv(content: string, filename: string) {
-  // BOM so Excel opens UTF-8 (e.g. macrons in Māori place names) correctly.
-  const blob = new Blob(["﻿", content], { type: "text/csv;charset=utf-8" });
+export function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -222,17 +219,18 @@ function parseEvents(raw: string, applicationId: string, warnings: string[]): Ap
   }
 }
 
-export async function readImportFile(file: File, existing: Application[]): Promise<ImportPreview> {
+/** Reads a CSV file in the browser and previews it. The server re-validates the text on import. */
+export async function readImportFile(file: File, existing: Application[]): Promise<{ text: string; preview: ImportPreview }> {
   if (file.size > MAX_IMPORT_BYTES) {
-    return { rows: [], fileErrors: ["This file is larger than 20 MB. Split it into smaller files and try again."] };
+    return { text: "", preview: { rows: [], fileErrors: ["This file is larger than 20 MB. Split it into smaller files and try again."] } };
   }
   let text: string;
   try {
     text = await file.text();
   } catch {
-    return { rows: [], fileErrors: ["The file could not be read."] };
+    return { text: "", preview: { rows: [], fileErrors: ["The file could not be read."] } };
   }
-  return previewImport(text, existing);
+  return { text, preview: previewImport(text, existing) };
 }
 
 export function previewImport(text: string, existing: Application[]): ImportPreview {
@@ -310,7 +308,8 @@ export function previewImport(text: string, existing: Application[]): ImportPrev
 
     if (errors.length > 0) return { rowNumber, status: "invalid", errors, warnings, companyName, jobTitle };
 
-    const id = duplicate ? duplicate.id : rawId && !existingById.has(rawId) ? rawId : newId();
+    // Keep a valid UUID from a previous export so re-imports stay idempotent.
+    const id = duplicate ? duplicate.id : isUuid(rawId) && !existingById.has(rawId) ? rawId : newId();
     const timestamp = new Date().toISOString();
     const validTimestamp = (v: string) => (v && !Number.isNaN(Date.parse(v)) ? new Date(v).toISOString() : timestamp);
 
@@ -366,24 +365,3 @@ export function previewImport(text: string, existing: Application[]): ImportPrev
 }
 
 export type DuplicateMode = "skip" | "overwrite";
-
-/** Writes the previewed rows. Returns how many were added and updated. */
-export async function commitImport(preview: ImportPreview, mode: DuplicateMode) {
-  const toWrite = preview.rows.filter((r) => r.status === "new" || (r.status === "duplicate" && mode === "overwrite"));
-  // One transaction: if anything fails, no categories or records are written.
-  await db.transaction("rw", [db.applications, db.stageHistory, db.events, db.categories], async () => {
-    const categoryIds = new Map<string, string>();
-    const records = [];
-    for (const row of toWrite) {
-      const { application, categoryName, history, events } = row.record!;
-      const nameKey = categoryName.toLowerCase();
-      if (!categoryIds.has(nameKey)) categoryIds.set(nameKey, (await getOrCreateCategory(categoryName)).id);
-      records.push({ application: { ...application, categoryId: categoryIds.get(nameKey)! }, history, events });
-    }
-    await putApplicationsWithHistory(records);
-  });
-  return {
-    added: toWrite.filter((r) => r.status === "new").length,
-    updated: toWrite.filter((r) => r.status === "duplicate").length,
-  };
-}

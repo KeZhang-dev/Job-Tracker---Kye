@@ -4,6 +4,9 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
+// Every page reads live data from PostgreSQL, so nothing is prerendered at build time.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Job Tracker",
   description: "A local-first tracker for job applications, interviews and outcomes.",

@@ -1,99 +1,20 @@
-"use client";
-
-import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useMemo } from "react";
-import { BriefcaseIcon, PlusIcon, SearchXIcon } from "lucide-react";
-import { applyQuery, distinctLocations, paramsFromQuery, queryFromParams, type ApplicationQuery, type SortField } from "@/lib/application-query";
-import { useApplications, useCategories } from "@/hooks/use-data";
-import { ApplicationFilters } from "@/components/applications/application-filters";
-import { ApplicationsTable } from "@/components/applications/applications-table";
-import { PageHeader } from "@/components/layout/page-header";
-import { EmptyState } from "@/components/shared/empty-state";
+import { Suspense } from "react";
+import { loadPageData } from "@/db/errors";
+import { listApplications, listCategories } from "@/lib/repository";
+import { ApplicationsView } from "@/components/applications/applications-view";
+import { DatabaseError } from "@/components/shared/database-error";
 import { PageLoading } from "@/components/shared/loading";
-import { Button } from "@/components/ui/button";
 
-function ApplicationsView() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const applications = useApplications();
-  const categories = useCategories();
-
-  // Filters live in the URL so they survive opening a record and coming back.
-  const query = useMemo(() => queryFromParams(new URLSearchParams(searchParams.toString())), [searchParams]);
-  const update = (patch: Partial<ApplicationQuery>) => {
-    const qs = paramsFromQuery({ ...query, ...patch }).toString();
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-  };
-  const onSort = (field: SortField) => {
-    const textField = field === "companyName" || field === "jobTitle";
-    if (query.sort === field) update({ direction: query.direction === "asc" ? "desc" : "asc" });
-    else update({ sort: field, direction: textField ? "asc" : "desc" });
-  };
-
-  const visible = useMemo(
-    () => (applications && categories ? applyQuery(applications, query, categories) : []),
-    [applications, categories, query],
-  );
-  const locations = useMemo(() => distinctLocations(applications ?? []), [applications]);
-
-  if (!applications || !categories) return <PageLoading label="Loading applications…" />;
-
-  const addButton = (
-    <Button asChild>
-      <Link href="/applications/new">
-        <PlusIcon aria-hidden />
-        Add Application
-      </Link>
-    </Button>
-  );
-
-  if (applications.length === 0) {
-    return (
-      <>
-        <PageHeader title="Applications" />
-        <EmptyState
-          icon={BriefcaseIcon}
-          title="No applications yet"
-          description="Add your first application to start tracking it, or import a CSV backup from Data & Settings."
-        >
-          {addButton}
-          <Button asChild variant="outline">
-            <Link href="/settings">Import or load sample data</Link>
-          </Button>
-        </EmptyState>
-      </>
-    );
-  }
-
+export default async function ApplicationsPage() {
+  const { data, error } = await loadPageData(async () => {
+    const [applications, categories] = await Promise.all([listApplications(), listCategories()]);
+    return { applications, categories };
+  });
+  if (error !== undefined) return <DatabaseError message={error} />;
   return (
-    <>
-      <PageHeader
-        title="Applications"
-        description={
-          visible.length === applications.length
-            ? `${applications.length} application${applications.length === 1 ? "" : "s"}`
-            : `Showing ${visible.length} of ${applications.length} applications`
-        }
-        actions={addButton}
-      />
-      <div className="space-y-4">
-        <ApplicationFilters query={query} onChange={update} categories={categories} locations={locations} />
-        {visible.length === 0 ? (
-          <EmptyState icon={SearchXIcon} title="No matching applications" description="Try a different search term or clear some filters." />
-        ) : (
-          <ApplicationsTable applications={visible} categories={categories} query={query} onSort={onSort} />
-        )}
-      </div>
-    </>
-  );
-}
-
-export default function ApplicationsPage() {
-  return (
+    // useSearchParams (filters in the URL) needs a Suspense boundary.
     <Suspense fallback={<PageLoading label="Loading applications…" />}>
-      <ApplicationsView />
+      <ApplicationsView {...data} />
     </Suspense>
   );
 }

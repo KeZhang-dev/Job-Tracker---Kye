@@ -1,20 +1,20 @@
-"use client";
-
-import { useParams } from "next/navigation";
-import { useApplication, useCategories } from "@/hooks/use-data";
+import { loadPageData } from "@/db/errors";
+import { getApplication, listCategories } from "@/lib/repository";
 import { ApplicationForm } from "@/components/applications/application-form";
 import { PageHeader } from "@/components/layout/page-header";
-import { PageLoading } from "@/components/shared/loading";
+import { DatabaseError } from "@/components/shared/database-error";
 import { ApplicationNotFound } from "@/components/shared/not-found-state";
 
-export default function EditApplicationPage() {
-  const { id } = useParams<{ id: string }>();
-  const application = useApplication(id);
-  const categories = useCategories();
+export default async function EditApplicationPage({ params }: PageProps<"/applications/[id]/edit">) {
+  const { id } = await params;
+  const { data, error } = await loadPageData(async () => {
+    const [application, categories] = await Promise.all([getApplication(id), listCategories()]);
+    return application ? { application, categories } : null;
+  });
+  if (error !== undefined) return <DatabaseError message={error} />;
+  if (!data) return <ApplicationNotFound />;
 
-  if (application === null) return <ApplicationNotFound />;
-  if (!application || !categories) return <PageLoading />;
-
+  const { application, categories } = data;
   return (
     <div className="mx-auto max-w-4xl">
       <PageHeader title="Edit application" description={`${application.jobTitle} · ${application.companyName}`} />

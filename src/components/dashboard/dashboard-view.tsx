@@ -100,10 +100,10 @@ export function DashboardView({
         <SummaryCards summary={data.summary} />
 
         <div className="grid gap-6 xl:grid-cols-2">
-          <ChartCard title="Applications by role category" description="Share of applications in each category.">
+          <ChartCard title="Applications category">
             {noneInRange ? <ChartEmpty /> : <RoleDonutChart rows={data.roles} categories={categories} />}
           </ChartCard>
-          <ChartCard title="Application sources" description="Where you found and applied for each role.">
+          <ChartCard title="Application sources">
             {noneInRange ? <ChartEmpty /> : <BarListChart rows={data.sources} labelWidth={150} caption="Applications by source" />}
           </ChartCard>
         </div>

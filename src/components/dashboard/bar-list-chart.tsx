@@ -11,13 +11,13 @@ export interface BarListRow {
   share?: number;
 }
 
-const ROW_HEIGHT = 34;
+const ROW_HEIGHT = 36;
 
 function ChartTooltip({ active, payload }: { active?: boolean; payload?: { payload: BarListRow }[] }) {
   if (!active || !payload?.length) return null;
   const row = payload[0].payload;
   return (
-    <div className="rounded-lg bg-popover px-3 py-2 text-xs shadow-md ring-1 ring-foreground/10">
+    <div className="rounded-lg bg-popover px-3 py-2 text-sm shadow-md ring-1 ring-foreground/10">
       <p className="font-medium text-foreground">{row.label}</p>
       <p className="mt-0.5 text-muted-foreground tabular-nums">
         {row.count} application{row.count === 1 ? "" : "s"}
@@ -56,7 +56,7 @@ export function BarListChart({
         layout="vertical"
         data={data}
         style={{ width: "100%", height: rows.length * ROW_HEIGHT + 8 }}
-        margin={{ top: 4, right: 72, bottom: 4, left: 0 }}
+        margin={{ top: 4, right: 80, bottom: 4, left: 0 }}
         barCategoryGap={8}
         accessibilityLayer
       >
@@ -67,7 +67,7 @@ export function BarListChart({
           width={labelWidth}
           tickLine={false}
           axisLine={false}
-          tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
+          tick={{ fontSize: 14, fill: "var(--muted-foreground)" }}
           interval={0}
         />
         <Tooltip content={<ChartTooltip />} cursor={{ fill: "var(--muted)", opacity: 0.6 }} isAnimationActive={false} />
@@ -77,7 +77,7 @@ export function BarListChart({
             position="right"
             offset={8}
             className="tabular-nums"
-            style={{ fontSize: 12, fill: "var(--foreground)" }}
+            style={{ fontSize: 14, fill: "var(--foreground)" }}
           />
         </Bar>
       </BarChart>

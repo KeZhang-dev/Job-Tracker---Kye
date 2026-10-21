@@ -22,7 +22,7 @@ export function DateRangeFilter({ value, onChange }: { value: DateFilter; onChan
             aria-pressed={selected}
             onClick={() => onChange({ preset: p.value })}
             className={cn(
-              "rounded-md px-3 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
+              "rounded-md px-3 py-1.5 text-[15px] font-medium whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
               selected && "bg-card text-foreground shadow-sm",
             )}
           >

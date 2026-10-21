@@ -45,7 +45,7 @@ function SliceTooltip({ active, payload }: { active?: boolean; payload?: { paylo
   if (!active || !payload?.length) return null;
   const s = payload[0].payload;
   return (
-    <div className="rounded-lg bg-popover px-3 py-2 text-xs shadow-md ring-1 ring-foreground/10">
+    <div className="rounded-lg bg-popover px-3 py-2 text-sm shadow-md ring-1 ring-foreground/10">
       <p className="font-medium text-foreground">{s.label}</p>
       <p className="mt-0.5 text-muted-foreground tabular-nums">
         {s.count} application{s.count === 1 ? "" : "s"} · {formatPercent(s.share, 1)}
@@ -59,12 +59,12 @@ export function RoleDonutChart({ rows, categories }: { rows: DistributionRow[]; 
   const total = slices.reduce((n, s) => n + s.count, 0);
 
   return (
-    <figure className="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
-      <div className="relative size-52 shrink-0">
+    <figure className="flex flex-col items-center gap-6">
+      <div className="relative size-56 shrink-0">
         {/* Rendered before the chart so the hover tooltip paints above the total. */}
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center" aria-hidden>
-          <span className="text-2xl font-semibold tracking-tight tabular-nums">{total}</span>
-          <span className="text-xs text-muted-foreground">applications</span>
+          <span className="text-3xl font-semibold tracking-tight tabular-nums">{total}</span>
+          <span className="text-sm text-muted-foreground">applications</span>
         </div>
         <PieChart responsive style={{ width: "100%", height: "100%" }} accessibilityLayer>
           <Pie
@@ -84,9 +84,9 @@ export function RoleDonutChart({ rows, categories }: { rows: DistributionRow[]; 
       </div>
 
       {/* Legend doubles as the direct labels, so identity never rests on colour alone. */}
-      <ul className="w-full min-w-0 space-y-1.5 text-sm">
+      <ul className="grid w-full min-w-0 gap-x-8 gap-y-2 text-[15px] sm:grid-cols-2">
         {slices.map((s) => (
-          <li key={s.key} className="flex items-center gap-2">
+          <li key={s.key} className="flex min-w-0 items-center gap-2">
             <span className="size-2.5 shrink-0 rounded-sm" style={{ background: s.fill }} aria-hidden />
             <span className="min-w-0 flex-1 truncate text-muted-foreground">{s.label}</span>
             <span className="tabular-nums">

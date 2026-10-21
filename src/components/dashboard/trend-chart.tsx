@@ -9,7 +9,7 @@ function TrendTooltip({ active, payload }: { active?: boolean; payload?: { paylo
   if (!active || !payload?.length) return null;
   const p = payload[0].payload;
   return (
-    <div className="rounded-lg bg-popover px-3 py-2 text-xs shadow-md ring-1 ring-foreground/10">
+    <div className="rounded-lg bg-popover px-3 py-2 text-sm shadow-md ring-1 ring-foreground/10">
       <p className="font-medium text-foreground">{p.fullLabel}</p>
       <p className="mt-0.5 text-muted-foreground tabular-nums">
         {p.count} application{p.count === 1 ? "" : "s"}
@@ -38,7 +38,7 @@ export function TrendChart({
           aria-pressed={granularity === g}
           onClick={() => onGranularityChange(g)}
           className={cn(
-            "rounded-md px-2.5 py-0.5 text-xs font-medium text-muted-foreground hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
+            "rounded-md px-3 py-1 text-sm font-medium text-muted-foreground hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
             granularity === g && "bg-card text-foreground shadow-sm",
           )}
         >
@@ -48,17 +48,10 @@ export function TrendChart({
     </div>
   );
 
-  const total = points.reduce((n, p) => n + p.count, 0);
-  const average = points.length ? total / points.length : 0;
-
   return (
     <ChartCard
       title="Application trend"
-      description={
-        points.length
-          ? `${average.toFixed(1)} applications per ${granularity} on average${undated ? ` · ${undated} without a valid date not shown` : ""}`
-          : "Applications submitted over time."
-      }
+      description={undated ? `${undated} without a valid date not shown` : undefined}
       action={toggle}
     >
       {points.length === 0 ? (
@@ -68,7 +61,7 @@ export function TrendChart({
           <LineChart
             responsive
             data={points}
-            style={{ width: "100%", height: 240 }}
+            style={{ width: "100%", height: 260 }}
             margin={{ top: 8, right: 12, bottom: 0, left: -16 }}
             accessibilityLayer
           >
@@ -77,10 +70,10 @@ export function TrendChart({
               dataKey="label"
               tickLine={false}
               axisLine={{ stroke: "var(--chart-grid)" }}
-              tick={{ fontSize: 11, fill: "var(--chart-axis)" }}
+              tick={{ fontSize: 13, fill: "var(--chart-axis)" }}
               minTickGap={12}
             />
-            <YAxis allowDecimals={false} tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "var(--chart-axis)" }} width={40} />
+            <YAxis allowDecimals={false} tickLine={false} axisLine={false} tick={{ fontSize: 13, fill: "var(--chart-axis)" }} width={40} />
             <Tooltip content={<TrendTooltip />} cursor={{ stroke: "var(--chart-axis)", strokeWidth: 1 }} isAnimationActive={false} />
             <Line
               type="monotone"

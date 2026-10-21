@@ -97,10 +97,6 @@ export interface Summary {
   active: number;
   /** Unique applications that ever reached an interview stage or have a logged interview. */
   interviewed: number;
-  /** Applications whose current stage is an interview stage. */
-  currentlyInterviewing: number;
-  /** Logged interview events (rounds) — can exceed `interviewed`. */
-  interviewRounds: number;
   /** Unique applications that ever reached the Offer stage. */
   offers: number;
   /** Applications whose current outcome is Rejected. */
@@ -114,8 +110,6 @@ export function computeSummary(apps: Application[], history: StageChange[], even
     total: apps.length,
     active: 0,
     interviewed: 0,
-    currentlyInterviewing: 0,
-    interviewRounds: 0,
     offers: 0,
     rejections: 0,
   };
@@ -129,11 +123,9 @@ export function computeSummary(apps: Application[], history: StageChange[], even
     const gotOffer = stages.has("offer");
 
     if (!isTerminalStage(app.stage)) summary.active++;
-    if (isInterviewStage(app.stage)) summary.currentlyInterviewing++;
     if (app.stage === "rejected") summary.rejections++;
     if (wasInterviewed) summary.interviewed++;
     if (gotOffer) summary.offers++;
-    summary.interviewRounds += interviewEvents;
   }
   return summary;
 }

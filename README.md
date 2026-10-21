@@ -63,7 +63,7 @@ pg_dump -U postgres -d job_tracker -f job_tracker_backup.sql
 - **Applications** has search (company or title), filters (stage, category, source, location, work mode, employment type) and sortable columns. Filters are kept in the URL, so you can open a record and come back to the same view. Click a row for the full detail view: job description, notes, details, status history, and interviews/assessments.
 - **Update stage** moves an application to *any* stage. Stages can be skipped or revisited, and each change is recorded in the status history with an optional date/time and note. Editing other fields never creates history entries.
 - **Log event** records each interview or assessment round, with notes.
-- **Dashboard** shows summary cards, role-category and source breakdowns (count and %), the current pipeline (active stages vs final outcomes), the application trend (weekly or monthly) and conversion rates. Everything responds to the All time / Last 30 days / Last 90 days / Custom range filter, which applies to the application date.
+- **Dashboard** shows summary cards, a role-category donut chart, application sources (count and %) and the application trend line (weekly or monthly). Everything responds to the All time / Last 30 days / Last 90 days / Last 180 days filter, which applies to the application date.
 - **Data & Settings** covers the database connection, CSV export/import, role categories (add, rename, delete; deleted categories move their applications to "Other"), and sample data.
 
 ### Metric definitions
@@ -73,12 +73,8 @@ pg_dump -U postgres -d job_tracker -f job_tracker_backup.sql
 | Total applications | All application records in the period |
 | In progress | Current stage is not a final outcome (Rejected, Withdrawn, No Response, Position Closed). Offer counts as in progress. |
 | Reached interview | Unique applications that were ever at First, Second or Technical Interview, or have a logged interview event |
-| Online assessments | Unique applications that were ever at Online Assessment, or have a logged assessment event |
 | Offers | Unique applications that ever reached the Offer stage |
 | Rejections | Applications whose *current* stage is Rejected |
-| Interview rate | Reached interview ÷ total applications |
-| Offer rate | Offers ÷ total applications |
-| Interview → offer | Offers among interviewed applications ÷ reached interview |
 
 Each application counts once per metric, however many stages or rounds it went through. Phone Screen is tracked separately and does not count as an interview.
 
@@ -110,7 +106,7 @@ src/
   db/                  Drizzle schema, connection pool, error messages
   components/
     applications/      form, table, filters, detail view, dialogs
-    dashboard/         summary cards, charts, conversion metrics
+    dashboard/         summary cards and charts
     settings/          database info, backup/import, legacy import, categories, sample data
     shared/, layout/   app shell, badges, empty/loading/error states
     ui/                shadcn/ui primitives

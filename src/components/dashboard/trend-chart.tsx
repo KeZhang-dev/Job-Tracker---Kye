@@ -1,6 +1,6 @@
 "use client";
 
-import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from "recharts";
 import type { TrendGranularity, TrendPoint } from "@/lib/metrics";
 import { cn } from "@/lib/utils";
 import { ChartCard, ChartEmpty } from "./chart-card";
@@ -65,11 +65,11 @@ export function TrendChart({
         <ChartEmpty message="No dated applications in this period." />
       ) : (
         <figure>
-          <BarChart
+          <LineChart
             responsive
             data={points}
             style={{ width: "100%", height: 240 }}
-            margin={{ top: 8, right: 8, bottom: 0, left: -16 }}
+            margin={{ top: 8, right: 12, bottom: 0, left: -16 }}
             accessibilityLayer
           >
             <CartesianGrid vertical={false} stroke="var(--chart-grid)" />
@@ -81,9 +81,19 @@ export function TrendChart({
               minTickGap={12}
             />
             <YAxis allowDecimals={false} tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "var(--chart-axis)" }} width={40} />
-            <Tooltip content={<TrendTooltip />} cursor={{ fill: "var(--muted)", opacity: 0.6 }} isAnimationActive={false} />
-            <Bar dataKey="count" fill="var(--series-1)" radius={[4, 4, 0, 0]} maxBarSize={32} isAnimationActive={false} />
-          </BarChart>
+            <Tooltip content={<TrendTooltip />} cursor={{ stroke: "var(--chart-axis)", strokeWidth: 1 }} isAnimationActive={false} />
+            <Line
+              type="monotone"
+              dataKey="count"
+              stroke="var(--series-1)"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              dot={points.length <= 26 ? { r: 3, fill: "var(--series-1)", strokeWidth: 0 } : false}
+              activeDot={{ r: 5, fill: "var(--series-1)", stroke: "var(--card)", strokeWidth: 2 }}
+              isAnimationActive={false}
+            />
+          </LineChart>
           <table className="sr-only">
             <caption>Applications per {granularity}</caption>
             <tbody>

@@ -8,7 +8,6 @@ import {
   applicationTrend,
   computeSummary,
   filterByDateRange,
-  pipelineCounts,
   resolveRange,
   roleDistribution,
   sourceDistribution,
@@ -19,9 +18,8 @@ import { parseDateOnly } from "@/lib/dates";
 import type { Application, ApplicationEvent, Category, StageChange } from "@/lib/types";
 import { BarListChart } from "@/components/dashboard/bar-list-chart";
 import { ChartCard, ChartEmpty } from "@/components/dashboard/chart-card";
-import { ConversionMetrics } from "@/components/dashboard/conversion-metrics";
 import { DateRangeFilter } from "@/components/dashboard/date-range-filter";
-import { PipelineChart } from "@/components/dashboard/pipeline-chart";
+import { RoleDonutChart } from "@/components/dashboard/role-donut-chart";
 import { SummaryCards } from "@/components/dashboard/summary-cards";
 import { TrendChart } from "@/components/dashboard/trend-chart";
 import { PageHeader } from "@/components/layout/page-header";
@@ -62,7 +60,6 @@ export function DashboardView({
       summary: computeSummary(apps, appHistory, appEvents),
       roles: roleDistribution(apps, categories),
       sources: sourceDistribution(apps),
-      pipeline: pipelineCounts(apps),
       trend: applicationTrend(apps, granularity, range),
     };
   }, [applications, categories, history, events, dateFilter, granularityChoice]);
@@ -74,7 +71,7 @@ export function DashboardView({
         <EmptyState
           icon={LayoutDashboardIcon}
           title="Your job search dashboard"
-          description="Once you add applications, this page shows your pipeline, response rates, sources and activity over time."
+          description="Once you add applications, this page shows your progress, role categories, sources and activity over time."
         >
           <Button asChild>
             <Link href="/applications/new">
@@ -96,24 +93,20 @@ export function DashboardView({
     <>
       <PageHeader
         title="Dashboard"
-        description={noneInRange ? "No applications in the selected period." : `Based on ${data.summary.total} application${data.summary.total === 1 ? "" : "s"} in the selected period.`}
         actions={<DateRangeFilter value={dateFilter} onChange={setDateFilter} />}
       />
 
       <div className="space-y-6">
         <SummaryCards summary={data.summary} />
-        <ConversionMetrics summary={data.summary} />
 
         <div className="grid gap-6 xl:grid-cols-2">
-          <ChartCard title="Applications by role category" description="Count and share of applications in each category.">
-            {noneInRange ? <ChartEmpty /> : <BarListChart rows={data.roles} labelWidth={170} caption="Applications by role category" />}
+          <ChartCard title="Applications by role category" description="Share of applications in each category.">
+            {noneInRange ? <ChartEmpty /> : <RoleDonutChart rows={data.roles} categories={categories} />}
           </ChartCard>
           <ChartCard title="Application sources" description="Where you found and applied for each role.">
             {noneInRange ? <ChartEmpty /> : <BarListChart rows={data.sources} labelWidth={150} caption="Applications by source" />}
           </ChartCard>
         </div>
-
-        <PipelineChart counts={data.pipeline} />
 
         <TrendChart
           points={data.trend.points}

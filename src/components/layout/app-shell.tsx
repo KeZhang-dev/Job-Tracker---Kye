@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { BriefcaseIcon, LayoutDashboardIcon, ListIcon, MenuIcon, PlusIcon, SettingsIcon } from "lucide-react";
+import { LayoutDashboardIcon, ListIcon, MenuIcon, PlusIcon, SettingsIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -23,10 +23,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   return (
     <div className="flex h-full flex-col gap-6 p-4">
-      <Link href="/" onClick={onNavigate} className="flex items-center gap-2 px-2 text-sm font-semibold">
-        <span className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-          <BriefcaseIcon className="size-4" aria-hidden />
-        </span>
+      <Link href="/" onClick={onNavigate} className="px-2 text-xl font-semibold tracking-tight">
         Job Tracker
       </Link>
 
@@ -57,10 +54,6 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
           );
         })}
       </nav>
-
-      <p className="mt-auto px-2 text-xs leading-relaxed text-muted-foreground">
-        Data is stored in your local PostgreSQL database. Export a CSV backup regularly from Data &amp; Settings.
-      </p>
     </div>
   );
 }
@@ -88,7 +81,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <NavContent onNavigate={() => setMenuOpen(false)} />
             </SheetContent>
           </Sheet>
-          <span className="text-sm font-semibold">Job Tracker</span>
+          <span className="text-base font-semibold">Job Tracker</span>
           <Button asChild size="sm" className="ml-auto">
             <Link href="/applications/new">
               <PlusIcon aria-hidden />

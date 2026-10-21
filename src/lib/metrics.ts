@@ -15,22 +15,19 @@ import {
   INTERVIEW_EVENT_TYPES,
   SOURCES,
   SOURCE_LABELS,
-  STAGES,
   isInterviewStage,
   isTerminalStage,
   type Source,
   type Stage,
 } from "./constants";
 import { parseDateOnly } from "./dates";
-import type { Application, ApplicationEvent, Category, DateOnly, StageChange } from "./types";
+import type { Application, ApplicationEvent, Category, StageChange } from "./types";
 
 // ---- Date filtering --------------------------------------------------------
 
-export type DatePreset = "all" | "30d" | "90d" | "custom";
+export type DatePreset = "all" | "30d" | "90d" | "180d";
 export interface DateFilter {
   preset: DatePreset;
-  from?: DateOnly;
-  to?: DateOnly;
 }
 
 export interface ResolvedRange {
@@ -46,11 +43,8 @@ export function resolveRange(filter: DateFilter, today = new Date()): ResolvedRa
       return { from: startOfDay(subDays(today, 29)), to: endOfDay(today) };
     case "90d":
       return { from: startOfDay(subDays(today, 89)), to: endOfDay(today) };
-    case "custom": {
-      const from = parseDateOnly(filter.from);
-      const to = parseDateOnly(filter.to);
-      return { from: from ? startOfDay(from) : null, to: to ? endOfDay(to) : null };
-    }
+    case "180d":
+      return { from: startOfDay(subDays(today, 179)), to: endOfDay(today) };
   }
 }
 
@@ -107,14 +101,10 @@ export interface Summary {
   currentlyInterviewing: number;
   /** Logged interview events (rounds) — can exceed `interviewed`. */
   interviewRounds: number;
-  /** Unique applications that reached Online Assessment or logged an assessment. */
-  assessments: number;
   /** Unique applications that ever reached the Offer stage. */
   offers: number;
   /** Applications whose current outcome is Rejected. */
   rejections: number;
-  /** Unique offers among the interviewed applications (interview-to-offer numerator). */
-  offersAfterInterview: number;
 }
 
 export function computeSummary(apps: Application[], history: StageChange[], events: ApplicationEvent[]): Summary {
@@ -126,10 +116,8 @@ export function computeSummary(apps: Application[], history: StageChange[], even
     interviewed: 0,
     currentlyInterviewing: 0,
     interviewRounds: 0,
-    assessments: 0,
     offers: 0,
     rejections: 0,
-    offersAfterInterview: 0,
   };
 
   for (const app of apps) {
@@ -138,35 +126,16 @@ export function computeSummary(apps: Application[], history: StageChange[], even
     const interviewEvents = appEvents.filter((e) => INTERVIEW_EVENT_TYPES.includes(e.type)).length;
 
     const wasInterviewed = interviewEvents > 0 || [...stages].some(isInterviewStage);
-    const hadAssessment = stages.has("online_assessment") || appEvents.some((e) => e.type === "online_assessment");
     const gotOffer = stages.has("offer");
 
     if (!isTerminalStage(app.stage)) summary.active++;
     if (isInterviewStage(app.stage)) summary.currentlyInterviewing++;
     if (app.stage === "rejected") summary.rejections++;
     if (wasInterviewed) summary.interviewed++;
-    if (hadAssessment) summary.assessments++;
     if (gotOffer) summary.offers++;
-    if (gotOffer && wasInterviewed) summary.offersAfterInterview++;
     summary.interviewRounds += interviewEvents;
   }
   return summary;
-}
-
-export interface ConversionRates {
-  interviewRate: number | null;
-  offerRate: number | null;
-  interviewToOfferRate: number | null;
-}
-
-const ratio = (n: number, d: number) => (d > 0 ? n / d : null);
-
-export function computeConversion(summary: Summary): ConversionRates {
-  return {
-    interviewRate: ratio(summary.interviewed, summary.total),
-    offerRate: ratio(summary.offers, summary.total),
-    interviewToOfferRate: ratio(summary.offersAfterInterview, summary.interviewed),
-  };
 }
 
 // ---- Distributions ---------------------------------------------------------
@@ -205,12 +174,6 @@ export function sourceDistribution(apps: Application[]): DistributionRow[] {
     counts.get(key)!.count++;
   }
   return toRows(counts, apps.length);
-}
-
-export function pipelineCounts(apps: Application[]): Record<Stage, number> {
-  const counts = Object.fromEntries(STAGES.map((s) => [s, 0])) as Record<Stage, number>;
-  for (const app of apps) counts[app.stage]++;
-  return counts;
 }
 
 // ---- Trends ----------------------------------------------------------------

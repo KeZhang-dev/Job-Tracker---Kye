@@ -1,4 +1,4 @@
-import { AwardIcon, ClipboardCheckIcon, FileTextIcon, HourglassIcon, UsersIcon, XCircleIcon, type LucideIcon } from "lucide-react";
+import { AwardIcon, FileTextIcon, HourglassIcon, UsersIcon, XCircleIcon, type LucideIcon } from "lucide-react";
 import type { Summary } from "@/lib/metrics";
 import { Card } from "@/components/ui/card";
 
@@ -18,7 +18,7 @@ function StatTile({ label, value, detail, icon: Icon }: { label: string; value: 
 export function SummaryCards({ summary }: { summary: Summary }) {
   const closed = summary.total - summary.active;
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
       <StatTile icon={FileTextIcon} label="Total applications" value={summary.total} detail={`${closed} closed`} />
       <StatTile icon={HourglassIcon} label="In progress" value={summary.active} detail="No final outcome yet" />
       <StatTile
@@ -27,7 +27,6 @@ export function SummaryCards({ summary }: { summary: Summary }) {
         value={summary.interviewed}
         detail={`${summary.currentlyInterviewing} interviewing now · ${summary.interviewRounds} round${summary.interviewRounds === 1 ? "" : "s"} logged`}
       />
-      <StatTile icon={ClipboardCheckIcon} label="Online assessments" value={summary.assessments} detail="Applications with an OA" />
       <StatTile icon={AwardIcon} label="Offers" value={summary.offers} detail="Applications that reached Offer" />
       <StatTile icon={XCircleIcon} label="Rejections" value={summary.rejections} detail="Currently rejected" />
     </div>

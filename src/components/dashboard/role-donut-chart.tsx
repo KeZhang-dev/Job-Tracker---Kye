@@ -5,9 +5,14 @@ import { FALLBACK_CATEGORY } from "@/lib/constants";
 import { formatPercent, type DistributionRow } from "@/lib/metrics";
 import type { Category } from "@/lib/types";
 
-/** Fixed categorical order (validated palette); a 9th hue is never generated. */
-const CATEGORY_COLORS = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#6250d6", "#e34948"];
-const OTHER_COLOR = "#9ba4b2";
+/**
+ * Fixed categorical order (validated palette); a 9th hue is never generated.
+ * Light/dark steps live in globals.css; the hex fallbacks are the light steps.
+ */
+const CATEGORY_COLORS = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#6250d6", "#e34948"].map(
+  (hex, i) => `var(--cat-${i + 1}, ${hex})`,
+);
+const OTHER_COLOR = "var(--series-muted, #9ba4b2)";
 const OTHER_KEY = "__other";
 
 interface Slice extends DistributionRow {
@@ -15,14 +20,15 @@ interface Slice extends DistributionRow {
 }
 
 /**
- * Colour follows the category (its position in the category list), never its
- * rank, so a date filter doesn't repaint slices. "Other", uncategorised rows and
- * any categories beyond the eighth fold into one gray "Other" slice.
+ * Colour follows the category, never its rank, so a date filter doesn't repaint
+ * slices: categories that have any application (across all time) take colours in
+ * category-list order. "Other", uncategorised rows and anything past the eighth
+ * colour fold into one gray "Other" slice.
  */
-function toSlices(rows: DistributionRow[], categories: Category[]): Slice[] {
+function toSlices(rows: DistributionRow[], categories: Category[], usedCategoryIds: Set<string>): Slice[] {
   const colorById = new Map(
     categories
-      .filter((c) => c.name.toLowerCase() !== FALLBACK_CATEGORY.toLowerCase())
+      .filter((c) => usedCategoryIds.has(c.id) && c.name.toLowerCase() !== FALLBACK_CATEGORY.toLowerCase())
       .slice(0, CATEGORY_COLORS.length)
       .map((c, i) => [c.id, CATEGORY_COLORS[i]]),
   );
@@ -54,8 +60,16 @@ function SliceTooltip({ active, payload }: { active?: boolean; payload?: { paylo
   );
 }
 
-export function RoleDonutChart({ rows, categories }: { rows: DistributionRow[]; categories: Category[] }) {
-  const slices = toSlices(rows, categories);
+export function RoleDonutChart({
+  rows,
+  categories,
+  usedCategoryIds,
+}: {
+  rows: DistributionRow[];
+  categories: Category[];
+  usedCategoryIds: Set<string>;
+}) {
+  const slices = toSlices(rows, categories, usedCategoryIds);
   const total = slices.reduce((n, s) => n + s.count, 0);
 
   return (

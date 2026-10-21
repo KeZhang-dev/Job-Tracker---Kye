@@ -7,6 +7,7 @@ import { LayoutDashboardIcon, ListIcon, MenuIcon, PlusIcon, SettingsIcon } from 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 
 const NAV = [
   { href: "/", label: "Dashboard", icon: LayoutDashboardIcon },
@@ -54,6 +55,10 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
           );
         })}
       </nav>
+
+      <div className="mt-auto">
+        <ThemeToggle />
+      </div>
     </div>
   );
 }

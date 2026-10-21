@@ -56,6 +56,7 @@ export function DashboardView({
 
     return {
       apps,
+      usedCategoryIds: new Set(applications.map((a) => a.categoryId)),
       granularity,
       summary: computeSummary(apps, appHistory, appEvents),
       roles: roleDistribution(apps, categories),
@@ -101,7 +102,7 @@ export function DashboardView({
 
         <div className="grid gap-6 xl:grid-cols-2">
           <ChartCard title="Applications category">
-            {noneInRange ? <ChartEmpty /> : <RoleDonutChart rows={data.roles} categories={categories} />}
+            {noneInRange ? <ChartEmpty /> : <RoleDonutChart rows={data.roles} categories={categories} usedCategoryIds={data.usedCategoryIds} />}
           </ChartCard>
           <ChartCard title="Application sources">
             {noneInRange ? <ChartEmpty /> : <BarListChart rows={data.sources} labelWidth={150} caption="Applications by source" />}

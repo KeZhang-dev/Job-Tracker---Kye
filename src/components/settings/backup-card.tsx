@@ -16,7 +16,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 function Stat({ label, value, tone }: { label: string; value: number; tone?: "warn" | "error" }) {
   return (
     <div className="rounded-lg border p-3">
-      <p className={tone === "error" ? "text-xs text-destructive" : tone === "warn" ? "text-xs text-amber-700" : "text-xs text-muted-foreground"}>{label}</p>
+      <p className={tone === "error" ? "text-xs text-destructive" : tone === "warn" ? "text-xs text-amber-700 dark:text-amber-300" : "text-xs text-muted-foreground"}>{label}</p>
       <p className="text-xl font-semibold tabular-nums">{value}</p>
     </div>
   );
@@ -119,7 +119,7 @@ export function ImportDialog({ pending, onClose }: { pending: PendingImport | nu
                           <p key={`e${i}`} className="text-destructive">✕ {e}</p>
                         ))}
                         {r.warnings.map((w, i) => (
-                          <p key={`w${i}`} className="text-amber-700">! {w}</p>
+                          <p key={`w${i}`} className="text-amber-700 dark:text-amber-300">! {w}</p>
                         ))}
                       </li>
                     ))}
@@ -204,7 +204,7 @@ export function BackupCard({ applications }: { applications: Application[] }) {
           <input ref={fileInput} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => void handleFile(e)} aria-label="Choose CSV file to import" />
         </div>
         <p className="flex gap-2 text-xs text-muted-foreground">
-          <AlertTriangleIcon className="size-4 shrink-0 text-amber-600" aria-hidden />
+          <AlertTriangleIcon className="size-4 shrink-0 text-amber-600 dark:text-amber-300" aria-hidden />
           Imports need at least “Company Name” and “Job Title” columns. Unknown stages, sources or dates are flagged before anything is saved.
         </p>
       </CardContent>

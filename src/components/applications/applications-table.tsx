@@ -53,7 +53,7 @@ function ClosingDate({ value, stageIsTerminal }: { value: string | null; stageIs
   const days = Math.ceil((date.getTime() - new Date().setHours(0, 0, 0, 0)) / 86_400_000);
   const soon = !stageIsTerminal && days >= 0 && days <= 3;
   return (
-    <span className={cn(soon && "font-medium text-amber-700")}>
+    <span className={cn(soon && "font-medium text-amber-700 dark:text-amber-300")}>
       {formatDate(value)}
       {soon && <span className="sr-only"> (closing soon)</span>}
     </span>

@@ -12,7 +12,7 @@ function StatTile({ label, value }: { label: string; value: number }) {
 
 export function SummaryCards({ summary }: { summary: Summary }) {
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+    <div className="grid grid-cols-2 gap-5 md:grid-cols-3 xl:grid-cols-5">
       <StatTile label="Total applications" value={summary.total} />
       <StatTile label="In progress" value={summary.active} />
       <StatTile label="Reached interview" value={summary.interviewed} />

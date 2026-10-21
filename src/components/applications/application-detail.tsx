@@ -190,8 +190,8 @@ export function ApplicationDetail({
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
+      <div className="grid gap-5 lg:grid-cols-3">
+        <div className="space-y-5 lg:col-span-2">
           <Card>
             <CardHeader>
               <CardTitle>Job description</CardTitle>
@@ -211,7 +211,7 @@ export function ApplicationDetail({
           <EventsCard applicationId={app.id} events={events} />
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-5">
           <Card>
             <CardHeader>
               <CardTitle>Details</CardTitle>

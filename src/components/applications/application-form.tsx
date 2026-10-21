@@ -186,7 +186,7 @@ export function ApplicationForm({ application, categories }: { application?: App
   });
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-6">
+    <form onSubmit={handleSubmit} noValidate className="space-y-5">
       <Section title="Company & role" description="Keep the job title exactly as it appears in the advertisement.">
         <FormField id="field-companyName" label="Company name" required error={errors.companyName}>
           <Input {...text("companyName")} maxLength={LIMITS.companyName} autoComplete="off" />

@@ -18,13 +18,13 @@ export default async function SettingsPage() {
     <>
       <PageHeader title="Data & Settings" description="Back up your data, manage categories and sample records." />
       {error !== undefined ? (
-        <div className="space-y-6">
+        <div className="space-y-5">
           <DatabaseError message={error} />
           <DatabaseCard />
         </div>
       ) : (
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className="space-y-6">
+        <div className="grid gap-5 lg:grid-cols-2">
+          <div className="space-y-5">
             <LegacyImportCard applications={data.applications} />
             <DatabaseCard />
             <BackupCard applications={data.applications} />

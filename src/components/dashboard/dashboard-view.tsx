@@ -97,10 +97,10 @@ export function DashboardView({
         actions={<DateRangeFilter value={dateFilter} onChange={setDateFilter} />}
       />
 
-      <div className="space-y-6">
+      <div className="space-y-5">
         <SummaryCards summary={data.summary} />
 
-        <div className="grid gap-6 xl:grid-cols-2">
+        <div className="grid gap-5 xl:grid-cols-2">
           <ChartCard title="Applications category">
             {noneInRange ? <ChartEmpty /> : <RoleDonutChart rows={data.roles} categories={categories} usedCategoryIds={data.usedCategoryIds} />}
           </ChartCard>

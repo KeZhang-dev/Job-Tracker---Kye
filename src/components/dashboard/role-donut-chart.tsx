@@ -6,10 +6,8 @@ import { formatPercent, type DistributionRow } from "@/lib/metrics";
 import type { Category } from "@/lib/types";
 
 /** Fixed categorical order (validated palette); a 9th hue is never generated. */
-const CATEGORY_COLORS = ["--cat-1", "--cat-2", "--cat-3", "--cat-4", "--cat-5", "--cat-6", "--cat-7", "--cat-8"].map(
-  (v) => `var(${v})`,
-);
-const OTHER_COLOR = "var(--series-muted)";
+const CATEGORY_COLORS = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#6250d6", "#e34948"];
+const OTHER_COLOR = "#9ba4b2";
 const OTHER_KEY = "__other";
 
 interface Slice extends DistributionRow {

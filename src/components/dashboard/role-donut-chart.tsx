@@ -61,6 +61,11 @@ export function RoleDonutChart({ rows, categories }: { rows: DistributionRow[]; 
   return (
     <figure className="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
       <div className="relative size-52 shrink-0">
+        {/* Rendered before the chart so the hover tooltip paints above the total. */}
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center" aria-hidden>
+          <span className="text-2xl font-semibold tracking-tight tabular-nums">{total}</span>
+          <span className="text-xs text-muted-foreground">applications</span>
+        </div>
         <PieChart responsive style={{ width: "100%", height: "100%" }} accessibilityLayer>
           <Pie
             data={slices}
@@ -74,12 +79,8 @@ export function RoleDonutChart({ rows, categories }: { rows: DistributionRow[]; 
             strokeWidth={2}
             isAnimationActive={false}
           />
-          <Tooltip content={<SliceTooltip />} isAnimationActive={false} />
+          <Tooltip content={<SliceTooltip />} wrapperStyle={{ zIndex: 10 }} allowEscapeViewBox={{ x: true, y: true }} isAnimationActive={false} />
         </PieChart>
-        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center" aria-hidden>
-          <span className="text-2xl font-semibold tracking-tight tabular-nums">{total}</span>
-          <span className="text-xs text-muted-foreground">applications</span>
-        </div>
       </div>
 
       {/* Legend doubles as the direct labels, so identity never rests on colour alone. */}
